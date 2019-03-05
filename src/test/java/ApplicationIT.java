@@ -32,6 +32,19 @@ public class ApplicationIT {
     static final String userSqlLocation = "/usr/local/data/users.sql";
     static String baseURL;
 
+    /**
+     * Runs once before all tests in the suite run.
+     * Configures an instance of mysql with the exposedPort 3306 and network alias "mysql". Mounts the file /sql/bootstrap.sql in the docker-entrypoint-initdb.d folder. This runs before the instance is ready.
+     * The bootstrap.sql creates the database, user, and gives permission to the user on that database.
+     * Also mounts the users.sql file to the userSqlLocation to be used later in the test.
+     *
+     *
+     * Creates an instance of the parisbutterfield/testcontainers running on the same docker newtwork as mysql. Exposes the port 8080 which will be mapped to a random port.
+     * Sets the spring_datasource_url environment variable with the jdbc url to connect to the mysql container. https://www.baeldung.com/properties-with-spring
+     *
+     * Sets the baseURL to the app container's ip and first mapped port. To allow the test which runs outside the network, to communicate with the app.
+     * @throws Exception
+     */
     @BeforeClass
     public static void setUp() throws Exception {
       mysql = new GenericContainer("mysql:5.7")
@@ -53,6 +66,11 @@ public class ApplicationIT {
       logger.info("URL for external app is " + baseURL);
     }
 
+
+    /**
+     * Enables container logging.
+     * @param container
+     */
     public static void enableContainerLogger(GenericContainer container) {
         Slf4jLogConsumer logConsumer =  new Slf4jLogConsumer(logger);
         container.followOutput(logConsumer);
